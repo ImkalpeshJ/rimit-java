@@ -31,7 +31,7 @@ The developer kit contains the following directories.
     Used to manage debit transactions.
 -   **transactionCredit**\
     Used to manage credit transactions.
--   **status**\
+-   **statusCheck**\
     Used to find the latest status of the transaction.
 
 #### `/src/main/webapp/WEB-INF`
