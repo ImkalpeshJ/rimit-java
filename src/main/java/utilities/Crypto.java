@@ -4,8 +4,6 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -30,6 +28,7 @@ public class Crypto {
 		}
 	}).create();
 
+	
 	public static String encryptRimitData(String data, final String key) {
 		try {
 			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
@@ -50,9 +49,13 @@ public class Crypto {
 
 			String encrypted = Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes("UTF-8")));
 
-			Map<String, Object> encryptedData = new HashMap<String, Object>();
-			encryptedData.put("cipher_text", encrypted);
-			encryptedData.put("iv", iv);
+			String salt = iv + iv;
+			String hash = Hashing.hashData(encrypted, salt);
+
+			JsonObject encryptedData = new JsonObject();
+			encryptedData.addProperty("cipher_text", encrypted);
+			encryptedData.addProperty("iv", iv);
+			encryptedData.addProperty("hash", hash);
 
 			System.out.println("*** ENCRYPTED DATA ***");
 			System.out.println(gson.toJson(encryptedData));
@@ -66,6 +69,7 @@ public class Crypto {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public static JsonObject decryptRimitData(final JsonObject data, final String key) {
 		try {
 
@@ -96,7 +100,16 @@ public class Crypto {
 			System.out.println(gson.toJson(decryptedObject));
 			System.out.println("---------------------");
 
+			String salt = data.get("iv").getAsString() + data.get("iv").getAsString();
+			String hash = data.get("hash").getAsString();
+			boolean validHash = Hashing.hashVerify(encrypted, hash, salt);
+			if (!validHash) {
+				System.out.println("Invalid Hash");
+				return null;
+			}
+
 			return decryptedObject;
+
 		} catch (Exception e) {
 			System.out.println("Error " + e.toString());
 			return null;

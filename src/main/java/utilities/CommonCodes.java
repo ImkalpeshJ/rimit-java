@@ -43,12 +43,13 @@ public class CommonCodes {
     public static Integer RESULT_CODE_USER_DECLINED = 8894;
     public static Integer RESULT_CODE_TIME_EXPIRED = 8893;
     public static Integer RESULT_CODE_ATTEMPTS_TO_RETRY_EXCEEDED_MAXIMUM = 8892;
+    public static Integer RESULT_CODE_SETTLEMENT_ACCOUNT_NOT_FOUND = 8891;
     public static Integer RESULT_CODE_ENTITY_IS_INACTIVE = 9988;
     public static Integer RESULT_CODE_INSUFFICIENT_VIRTUAL_ACCOUNT_BALANCE = 9989;
     public static Integer RESULT_CODE_TRANSACTION_DETAILS_DO_NOT_MATCH = 2091;
     public static Integer RESULT_CODE_TRANSACTION_REFERENCE_IS_NOT_UNIQUE = 2092;
     public static Integer RESULT_CODE_TRANSACTION_REFERENCE_MUST_BE_SAME = 2093;
-
+    
     public static String RESULT_MESSAGE_E1001 = "The request is successfully processed";
     public static String RESULT_MESSAGE_E1002 = "The status updated as hold";
     public static String RESULT_MESSAGE_E9999 = "Processed request failed";
@@ -77,6 +78,7 @@ public class CommonCodes {
     public static String RESULT_MESSAGE_E8894 = "User declined";
     public static String RESULT_MESSAGE_E8893 = "Time expired";
     public static String RESULT_MESSAGE_E8892 = "Attempts to retry exceeded maximum";
+    public static String RESULT_MESSAGE_E8891 = "Settlement account not found";
     public static String RESULT_MESSAGE_E9988 = "Entity is inactive";
     public static String RESULT_MESSAGE_E9989 = "Insufficient virtual account balance";
 }

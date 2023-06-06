@@ -1,9 +1,5 @@
 package core;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,12 +25,6 @@ import static utilities.CommonCodes.*;
 
 @Path("/transaction")
 public class TransactionDebit {
-
-	Request requestModule;
-
-	public TransactionDebit() {
-		requestModule = new Request();
-	}
 
 	@POST
 	@Path("/debit-amount")
@@ -65,8 +55,6 @@ public class TransactionDebit {
 		head.put("timeStamp", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(date));
 
 		Response response = new Response();
-
-		// JsonObject commonCodes = null;
 
 		Map<String, Object> result = new HashMap<String, Object>();
 		Map<String, Object> data = new HashMap<String, Object>();
@@ -122,37 +110,36 @@ public class TransactionDebit {
 						response.error(gson.toJson(head), gson.toJson(result), gson.toJson(data)), HashMap.class);
 			}
 
-			JsonObject USER = null, TRANSACTION = null, REFUND_REFERENCE = null;
-			//
-			try {
-				USER = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").getAsJsonObject("remitter");
+			JsonObject USER = null, TRANSACTION = null, SETTLEMENT = null;
+
+				USER = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").getAsJsonObject("user");
 				TRANSACTION = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data")
 						.getAsJsonObject("transaction");
-				REFUND_REFERENCE = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data")
-						.getAsJsonObject("refund_reference");
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+				SETTLEMENT = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data")
+						.getAsJsonObject("settlement");
 
 			String USER_MOBILE = USER.get("mobile").getAsString();
 			String USER_COUNTRY_CODE = USER.get("country_code").getAsString();
 			String USER_ACCOUNT_NUMBER = USER.get("account_number").getAsString();
+			String USER_ACCOUNT_CLASS = USER.get("account_class").getAsString();
+			String USER_ACCOUNT_TYPE = USER.get("account_type").getAsString();
 			String USER_BRANCH_CODE = USER.get("branch_code").getAsString();
 
-			String TRANSACTION_TYPE = TRANSACTION.get("type").getAsString();
-			String TRANSACTION_ID = TRANSACTION.get("txn_id").getAsString();
-			String TRANSACTION_AMOUNT = TRANSACTION.get("amount").getAsString();
-			String TRANSACTION_DATE = TRANSACTION.get("date").getAsString();
-			String TRANSACTION_TIME = TRANSACTION.get("time").getAsString();
+			String TRANSACTION_NO = TRANSACTION.get("txn_number").getAsString();
+			String TRANSACTION_URN = TRANSACTION.get("txn_urn").getAsString();
+			String TRANSACTION_TYPE = TRANSACTION.get("txn_type").getAsString();
+			String TRANSACTION_NATURE = TRANSACTION.get("txn_nature").getAsString();
+			String TRANSACTION_NOTE = TRANSACTION.get("txn_note").getAsString();
+			String TRANSACTION_DATE = TRANSACTION.get("txn_date").getAsString();
+			String TRANSACTION_TIME = TRANSACTION.get("txn_time").getAsString();
+			String TRANSACTION_TIMESTAMP = TRANSACTION.get("txn_ts").getAsString();
+			String TRANSACTION_AMOUNT = TRANSACTION.get("txn_amount").getAsString();
+			String TRANSACTION_SERVICE_CHARGE = TRANSACTION.get("txn_service_charge").getAsString();
+			String TRANSACTION_SERVICE_PROVIDER_CHARGE= TRANSACTION.get("txn_sp_charge").getAsString();
+			String TRANSACTION_FEE = TRANSACTION.get("txn_fee").getAsString();
 
-			String REFUND_ID, REFUND_AMOUNT, REFUND_DATE, REFUND_TIME;
-			if (TRANSACTION_TYPE.equals("REFUND_DEBIT")) {
-				REFUND_ID = REFUND_REFERENCE.get("txn_id").getAsString();
-				REFUND_AMOUNT = REFUND_REFERENCE.get("amount").getAsString();
-				REFUND_DATE = REFUND_REFERENCE.get("date").getAsString();
-				REFUND_TIME = REFUND_REFERENCE.get("time").getAsString();
-			}
+			String SETTLEMENT_ACCOUNT_TYPE = SETTLEMENT.get("account_type").getAsString();
+			String SETTLEMENT_ACCOUNT_NUMBER = SETTLEMENT.get("account_number").getAsString();
 
 			/*  */
 			/*  */
@@ -178,10 +165,12 @@ public class TransactionDebit {
 			/*  */
 
 			Map<String, Object> DEBIT_CONFIRM_DATA = new HashMap<String, Object>();
-			DEBIT_CONFIRM_DATA.put("txn_id", TRANSACTION_ID);
+			DEBIT_CONFIRM_DATA.put("txn_urn", TRANSACTION_URN);
+			DEBIT_CONFIRM_DATA.put("txn_number", TRANSACTION_NO);
 			DEBIT_CONFIRM_DATA.put("txn_reference", TRANSACTION_REF);
 			DEBIT_CONFIRM_DATA.put("txn_amount", TRANSACTION_AMOUNT);
 			DEBIT_CONFIRM_DATA.put("txn_type", TRANSACTION_TYPE);
+			DEBIT_CONFIRM_DATA.put("txn_nature", TRANSACTION_NATURE);
 			DEBIT_CONFIRM_DATA.put("account_balance", ACCOUNT_BALANCE);
 
 			/*  */
@@ -191,21 +180,14 @@ public class TransactionDebit {
 			 */
 			boolean CHECK_LATEST_BALANCE = true;
 			if (!CHECK_LATEST_BALANCE) {
-
 				Map<String, Object> DEBIT_CONFIRM_RESULT = new HashMap<String, Object>();
 				DEBIT_CONFIRM_RESULT.put("code", RESULT_CODE_INSUFFICIENT_ACCOUNT_BALANCE);
 				DEBIT_CONFIRM_RESULT.put("status", STATUS_FAILED);
 				DEBIT_CONFIRM_RESULT.put("message", RESULT_MESSAGE_E8899);
 
-				JsonObject DEBIT_CONFIRM = requestModule.confirmTransaction(gson.toJson(DEBIT_CONFIRM_HEAD),
+				JsonObject DEBIT_CONFIRM = Request.confirmRequest(gson.toJson(DEBIT_CONFIRM_HEAD),
 						gson.toJson(DEBIT_CONFIRM_RESULT), gson.toJson(DEBIT_CONFIRM_DATA), DEBIT_CONFIRM_URL,
 						ENCRYPTION_KEY);
-
-				if (DEBIT_CONFIRM == null) {
-					System.out.println(
-							"DEBIT_CONFIRM - CHECK_LATEST_BALANCE - REQUEST STATUS");
-					System.out.println(gson.toJson(DEBIT_CONFIRM));
-				}
 
 				return null;
 			}
@@ -217,15 +199,9 @@ public class TransactionDebit {
 			DEBIT_CONFIRM_RESULT.put("status", STATUS_SUCCESS);
 			DEBIT_CONFIRM_RESULT.put("message", RESULT_MESSAGE_E1001);
 
-			JsonObject DEBIT_CONFIRM = requestModule.confirmTransaction(gson.toJson(DEBIT_CONFIRM_HEAD),
+			JsonObject DEBIT_CONFIRM = Request.confirmRequest(gson.toJson(DEBIT_CONFIRM_HEAD),
 					gson.toJson(DEBIT_CONFIRM_RESULT), gson.toJson(DEBIT_CONFIRM_DATA), DEBIT_CONFIRM_URL,
 					ENCRYPTION_KEY);
-
-			if (DEBIT_CONFIRM == null) {
-				System.out.println(
-						"CREDIT_CONFIRM - CHECK_ACCOUNT_STATUS - REQUEST STATUS");
-				System.out.println(gson.toJson(DEBIT_CONFIRM));
-			}
 
 			System.out.println("*****************");
 			System.out.println("DEBIT_CONFIRM - RESPONSE");

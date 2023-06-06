@@ -8,7 +8,6 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
@@ -44,12 +43,12 @@ public class Response {
 	}
 
 	public String error(String head, String result, String data) {
-		Map<String, Object> details = new HashMap<String, Object>();
-		details.put("data", gson.fromJson(data, HashMap.class));
-		details.put("result", gson.fromJson(result, HashMap.class));
+		Map<String, Object> content = new HashMap<String, Object>();
+		content.put("data", gson.fromJson(data, HashMap.class));
+		content.put("result", gson.fromJson(result, HashMap.class));
 
 		Map<String, Object> statusResponse = new HashMap<String, Object>();
-		statusResponse.put("details", details);
+		statusResponse.put("content", content);
 		statusResponse.put("head", gson.fromJson(head, HashMap.class));
 
 		return gson.toJson(statusResponse);

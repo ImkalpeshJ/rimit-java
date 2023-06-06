@@ -1,11 +1,5 @@
 package core;
 
-import java.io.BufferedReader;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,17 +18,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import com.google.gson.LongSerializationPolicy;
-import com.google.gson.reflect.TypeToken;
 
 import utilities.Crypto;
-import utilities.DoubleToIntDeserializer;
 import utilities.Response;
 import static utilities.Configs.*;
 import static utilities.CommonCodes.*;
@@ -52,13 +39,13 @@ public class AccountStatement {
 		return accountStatementId(request, null);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	@POST
 	@Path("/statement/{tenant_id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Map<String, Object> accountStatementId(Map<String, Object> request,
-			@PathParam("tenant_id") String tenant_id) throws JsonMappingException, JsonProcessingException {
+	public Map<String, Object> accountStatementId(Map<String, Object> request, @PathParam("tenant_id") String tenant_id)
+			throws JsonMappingException, JsonProcessingException {
 
 		System.out.println("------------------");
 		System.out.println("REQUEST : accountStatement");
@@ -74,8 +61,6 @@ public class AccountStatement {
 		head.put("timeStamp", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(date));
 
 		Response response = new Response();
-
-		// JsonObject commonCodes = null;
 
 		Map<String, Object> result = new HashMap<String, Object>();
 		Map<String, Object> data = new HashMap<String, Object>();
@@ -121,24 +106,18 @@ public class AccountStatement {
 
 			String USER_MOBILE = "", USER_CC = "", ACC_NO = "", ACC_BRANCH = "", START_DATE = "", END_DATE = "";
 			//
-			try {
-				USER_MOBILE = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("mobile")
-						.getAsString();
-				USER_CC = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("country_code")
-						.getAsString();
-				ACC_NO = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("account_number")
-						.getAsString();
-				ACC_BRANCH = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("branch_code")
-						.getAsString();
 
-				START_DATE = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("start_date")
-						.getAsString();
-				END_DATE = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("end_date")
-						.getAsString();
+			USER_MOBILE = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("mobile").getAsString();
+			USER_CC = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("country_code")
+					.getAsString();
+			ACC_NO = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("account_number")
+					.getAsString();
+			ACC_BRANCH = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("branch_code")
+					.getAsString();
 
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			START_DATE = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("start_date")
+					.getAsString();
+			END_DATE = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("end_date").getAsString();
 
 			/*  */
 			/*  */
@@ -182,24 +161,24 @@ public class AccountStatement {
 			 * FIND ALL TRANSACTIONS BETWEEN START_DATE & END_DATE IN THE RESPECTIVE ACCOUNT
 			 */
 			Map<String, Object> accountTransaction1 = new HashMap<String, Object>();
-			accountTransaction1.put("txn_id", "1245236ss45s4ad");
-			accountTransaction1.put("date", "2020-11-04");
-			accountTransaction1.put("time", "02:30PM");
-			accountTransaction1.put("debit_amount", "8,058.50");
+			accountTransaction1.put("txn_id", "");
+			accountTransaction1.put("date", "");
+			accountTransaction1.put("time", "");
+			accountTransaction1.put("debit_amount", "");
 			accountTransaction1.put("credit_amount", "");
-			accountTransaction1.put("balance", "2640.50");
-			accountTransaction1.put("description", "Cheque Number - 005652");
+			accountTransaction1.put("balance", "");
+			accountTransaction1.put("description", "");
 
 			ACCOUNT_TRANSACTION.add(accountTransaction1);
 
 			Map<String, Object> accountTransaction2 = new HashMap<String, Object>();
-			accountTransaction2.put("txn_id", "ht445236546h45fedd");
-			accountTransaction2.put("date", "2020-11-21");
-			accountTransaction2.put("time", "02:30PM");
+			accountTransaction2.put("txn_id", "");
+			accountTransaction2.put("date", "");
+			accountTransaction2.put("time", "");
 			accountTransaction2.put("debit_amount", "");
-			accountTransaction2.put("credit_amount", "10499.00");
-			accountTransaction2.put("balance", "10699.00");
-			accountTransaction2.put("description", "Cash Self Deposit");
+			accountTransaction2.put("credit_amount", "");
+			accountTransaction2.put("balance", "");
+			accountTransaction2.put("description", "");
 
 			ACCOUNT_TRANSACTION.add(accountTransaction2);
 
@@ -224,6 +203,7 @@ public class AccountStatement {
 				}
 			}
 			/*  */
+			String TRANSACTION_COUNT = "" + ACCOUNT_TRANSACTION.size();
 
 			Map<String, Object> USER_ACCOUNT = new HashMap<String, Object>();
 			USER_ACCOUNT.put("account_number", ACC_NO);
@@ -231,6 +211,7 @@ public class AccountStatement {
 			USER_ACCOUNT.put("account_balance", ACC_BALANCE);
 			USER_ACCOUNT.put("start_date", START_DATE);
 			USER_ACCOUNT.put("end_date", END_DATE);
+			USER_ACCOUNT.put("transactions_count", TRANSACTION_COUNT);
 
 			result.put("code", RESULT_CODE_SUCCESS);
 			result.put("status", STATUS_SUCCESS);

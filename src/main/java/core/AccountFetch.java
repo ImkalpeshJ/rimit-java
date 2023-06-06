@@ -1,11 +1,7 @@
 package core;
 
-import java.io.BufferedReader;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 
-import java.io.FileReader;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,9 +28,11 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import utilities.CommonCodes;
+import utilities.Configs;
 import utilities.Crypto;
+import utilities.Request;
 import utilities.Response;
-import static utilities.Configs.*;
 import static utilities.CommonCodes.*;
 
 @Path("/account")
@@ -50,7 +48,7 @@ public class AccountFetch {
 		return accountFetchId(request, null);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "unused"})
 	@POST
 	@Path("/fetch/{tenant_id}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -77,22 +75,21 @@ public class AccountFetch {
 		Map<String, Object> head = new HashMap<String, Object>();
 		head.put("api", "accountFetch");
 		head.put("apiVersion", "V1");
-		head.put("timeStamp", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(date));
+		head.put("timeStamp", new SimpleDateFormat("YYYY-MM-dd hh:mm:ss a").format(date));
 
 		Response response = new Response();
 
 		Map<String, Object> result = new HashMap<String, Object>();
 		Map<String, Object> data = new HashMap<String, Object>();
 
-		List<Map<String, Object>> USER_ACCOUNTS = new ArrayList<Map<String, Object>>();
 
 		try {
 			String TENANT_ID = "";
-			if (IS_MULTY_TENANT_PLATFORM.equals("YES")) {
-				if (MULTY_TENANT_MODE.equals("QUERY")) {
+			if (Configs.IS_MULTY_TENANT_PLATFORM.equals("YES")) {
+				if (Configs.MULTY_TENANT_MODE.equals("QUERY")) {
 					if (tenant_id != null)
 						TENANT_ID = tenant_id;
-				} else if (MULTY_TENANT_MODE.equals("PARAMS")) {
+				} else if (Configs.MULTY_TENANT_MODE.equals("PARAMS")) {
 					if (tenant_id != null)
 						TENANT_ID = tenant_id;
 				}
@@ -122,16 +119,11 @@ public class AccountFetch {
 						response.error(gson.toJson(head), gson.toJson(result), gson.toJson(data)), HashMap.class);
 			}
 
-			try {
-				String USER_MOBILE = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("mobile")
-						.getAsString();
-				String USER_CC = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("country_code")
-						.getAsString();
-				String DOB = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("dob").getAsString();
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			String USER_MOBILE = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("mobile")
+					.getAsString();
+			String USER_CC = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("country_code")
+					.getAsString();
+			String DOB = DECRYPTED_DATA.getAsJsonObject("content").getAsJsonObject("data").get("dob").getAsString();
 
 			/*  */
 			/*  */
@@ -160,80 +152,20 @@ public class AccountFetch {
 			}
 			/*  */
 
-			List<Map<String, Object>> ACCOUNT_DATA = new ArrayList<Map<String, Object>>();
 
-			/*  */
-			/* READ ALL ACCOUNTS OF THE USER IN ACCOUNTS DATA */
-			Map<String, Object> account1 = new HashMap<String, Object>();
-			account1.put("account_name", "ATHISH BALU");
-			account1.put("account_number", "11223333");
-			account1.put("branch_code", "BR001");
-			account1.put("branch_name", "KANNUR");
-			account1.put("account_type", "SAVING_ACCOUNT");
-			account1.put("account_class", "SAVING");
-			account1.put("txn_amount_limit", "5000");
-			account1.put("account_status", "ACTIVE");
-			account1.put("account_opening_date", "2020-09-01");
+			Map<String, Object> USER_DATA = new HashMap<String, Object>();
+			USER_DATA.put("mobile", USER_MOBILE);
+			USER_DATA.put("country_code", USER_CC);
 
-			account1.put("is_debit_allowed", true);
-			account1.put("is_credit_allowed", true);
-			account1.put("is_cash_debit_allowed", true);
-			account1.put("is_cash_credit_allowed", true);
-
-			ACCOUNT_DATA.add(account1);
-
-			Map<String, Object> account2 = new HashMap<String, Object>();
-			account2.put("account_name", "ATHISH BALU K");
-			account2.put("account_number", "613274841345");
-			account2.put("branch_code", "BR002");
-			account2.put("branch_name", "ERNAKULAM");
-			account2.put("account_type", "GOLD_LOAN");
-			account2.put("account_class", "GOLD");
-			account2.put("txn_amount_limit", "200000");
-			account2.put("account_status", "ACTIVE");
-			account2.put("account_opening_date", "2020-12-10");
-
-			account2.put("is_debit_allowed", true);
-			account2.put("is_credit_allowed", true);
-			account2.put("is_cash_debit_allowed", false);
-			account2.put("is_cash_credit_allowed", false);
-
-			ACCOUNT_DATA.add(account2);
-
-			/*  */
-
-			/*  */
-			/* ASSIGN DATA RECEIVED FROM ACCOUNTS_DATA ARRAY */
-
-			if (ACCOUNT_DATA.size() > 0) {
-				for (Map<String, Object> account : ACCOUNT_DATA) {
-					Map<String, Object> user_account = new HashMap<String, Object>();
-					user_account.put("account_name", account.get("account_name"));
-					user_account.put("account_number", account.get("account_number"));
-					user_account.put("branch_code", account.get("branch_code"));
-					user_account.put("branch_name", account.get("branch_name"));
-					user_account.put("account_type", account.get("account_type"));
-					user_account.put("account_class", account.get("account_class"));
-					user_account.put("txn_amount_limit", account.get("txn_amount_limit"));
-					user_account.put("account_status", account.get("account_status"));
-					user_account.put("account_opening_date", account.get("account_opening_date"));
-
-					user_account.put("is_debit_allowed", account.get("is_debit_allowed"));
-					user_account.put("is_credit_allowed", account.get("is_credit_allowed"));
-					user_account.put("is_cash_debit_allowed", account.get("is_cash_debit_allowed"));
-					user_account.put("is_cash_credit_allowed", account.get("is_cash_credit_allowed"));
-
-					USER_ACCOUNTS.add(user_account);
-				}
-			}
-			/*  */
+			// IF SUCCESSFUL, CALL addAccount
+			addAccount(USER_DATA);
 
 			result.put("code", RESULT_CODE_SUCCESS);
 			result.put("status", STATUS_SUCCESS);
 			result.put("message", RESULT_MESSAGE_E1001);
 
 			head.put("HTTP_CODE", HTTP_CODE_SUCCESS);
-			data.put("accounts", USER_ACCOUNTS);
+			data = null;
 			return new ObjectMapper().readValue(
 					response.success(gson.toJson(head), gson.toJson(result), gson.toJson(data), ENCRYPTION_KEY),
 					HashMap.class);
@@ -249,4 +181,118 @@ public class AccountFetch {
 					response.error(gson.toJson(result), gson.toJson(head), gson.toJson(data)), HashMap.class);
 		}
 	}
+
+	public boolean addAccount(Map<String, Object> userData) {
+		System.out.println("------------------");
+		System.out.println("REQUEST : AddAccount");
+		System.out.println("------------------");
+		Gson gson = new Gson();
+
+		try {
+			/*  */
+			/* ASSIGN ENCRYPTION_KEY, API_KEY & API_ID OF ENTITY */
+			String ENCRYPTION_KEY = "";
+			String AUTH_API_ID = "";
+			String AUTH_API_KEY = "";
+			/*  */
+
+			// ADD_ACCOUNT REQUEST URL
+			String ADD_ACCOUNT_URL = Configs.BASE_URL + "/account/add";
+
+			Map<String, Object> ADD_ACCOUNT_HEAD = new HashMap<>();
+			ADD_ACCOUNT_HEAD.put("api", "accountAdd");
+			ADD_ACCOUNT_HEAD.put("apiVersion", "V1");
+			ADD_ACCOUNT_HEAD.put("timeStamp", new SimpleDateFormat("YYYY-MM-dd hh:mm:ss a").format(new Date()));
+			Map<String, Object> auth = new HashMap<>();
+			auth.put("API_ID", AUTH_API_ID);
+			auth.put("API_KEY", AUTH_API_KEY);
+			ADD_ACCOUNT_HEAD.put("auth", auth);
+
+			/*  */
+			/* ASSIGN USER DATA BASED ON REQUEST DATA ON accountFetch */
+			Map<String, Object> USER_DATA = new HashMap<>();
+			USER_DATA.put("mobile", userData.get("mobile"));
+			USER_DATA.put("country_code", userData.get("country_code"));
+			/*  */
+
+			/*  */
+			/* READ ALL ACCOUNTS OF THE USER IN ACCOUNTS DATA */
+			Map<String, Object> ACCOUNTS_DATA = new HashMap<>();
+			ACCOUNTS_DATA.put("account_name", "");
+			ACCOUNTS_DATA.put("account_number", "");
+			ACCOUNTS_DATA.put("branch_code", "");
+			ACCOUNTS_DATA.put("branch_name", "");
+			ACCOUNTS_DATA.put("account_type", "");
+			ACCOUNTS_DATA.put("account_class", "");
+			ACCOUNTS_DATA.put("txn_amount_limit", "");
+			ACCOUNTS_DATA.put("account_status", "");
+			ACCOUNTS_DATA.put("account_opening_date", "");
+
+			ACCOUNTS_DATA.put("is_debit_allowed", true);
+			ACCOUNTS_DATA.put("is_credit_allowed", true);
+			ACCOUNTS_DATA.put("is_cash_debit_allowed", true);
+			ACCOUNTS_DATA.put("is_cash_credit_allowed", true);
+			ACCOUNTS_DATA.put("auth_salt", "");
+			/*  */
+
+			/*  */
+			/* ASSIGN DATA RECEIVED FROM ACCOUNTS_DATA MAP */
+			Map<String, Object> ACCOUNT = new HashMap<>();
+			ACCOUNT.put("account_name", ACCOUNTS_DATA.get("account_name"));
+			ACCOUNT.put("account_number", ACCOUNTS_DATA.get("account_number"));
+			ACCOUNT.put("branch_code", ACCOUNTS_DATA.get("branch_code"));
+			ACCOUNT.put("branch_name", ACCOUNTS_DATA.get("branch_name"));
+			ACCOUNT.put("account_type", ACCOUNTS_DATA.get("account_type"));
+			ACCOUNT.put("account_class", ACCOUNTS_DATA.get("account_class"));
+			ACCOUNT.put("account_status", ACCOUNTS_DATA.get("account_status"));
+			ACCOUNT.put("account_opening_date", ACCOUNTS_DATA.get("account_opening_date"));
+			ACCOUNT.put("account_currency", ACCOUNTS_DATA.get("account_currency"));
+			ACCOUNT.put("account_daily_limit", ACCOUNTS_DATA.get("account_daily_limit"));
+			ACCOUNT.put("is_debit_allowed", ACCOUNTS_DATA.get("is_debit_allowed"));
+			ACCOUNT.put("is_credit_allowed", ACCOUNTS_DATA.get("is_credit_allowed"));
+			ACCOUNT.put("is_cash_debit_allowed", ACCOUNTS_DATA.get("is_cash_debit_allowed"));
+			ACCOUNT.put("is_cash_credit_allowed", ACCOUNTS_DATA.get("is_cash_credit_allowed"));
+			ACCOUNT.put("auth_salt", ACCOUNTS_DATA.get("auth_salt"));
+
+			List<Map<String, Object>> USER_ACCOUNTS = new ArrayList<>();
+			USER_ACCOUNTS.add(ACCOUNT);
+			/*  */
+
+			Map<String, Object> ADD_ACCOUNTS_DATA = new HashMap<>();
+			ADD_ACCOUNTS_DATA.put("user", USER_DATA);
+			ADD_ACCOUNTS_DATA.put("accounts", USER_ACCOUNTS);
+
+			// IF THE ALL ACCOUNTS READ SUCCESSFULLY
+			Map<String, Object> ADD_ACCOUNT_RESULT = new HashMap<>();
+			ADD_ACCOUNT_RESULT.put("code", CommonCodes.RESULT_CODE_SUCCESS);
+			ADD_ACCOUNT_RESULT.put("status", CommonCodes.STATUS_SUCCESS);
+			ADD_ACCOUNT_RESULT.put("message", CommonCodes.RESULT_MESSAGE_E1001);
+
+			JsonObject ADD_ACCOUNT_CONFIRM = Request.confirmRequest(gson.toJson(ADD_ACCOUNT_HEAD),
+					gson.toJson(ADD_ACCOUNT_RESULT), gson.toJson(ADD_ACCOUNTS_DATA), ADD_ACCOUNT_URL, ENCRYPTION_KEY);
+
+			
+			System.out.println("*****************");
+			System.out.println("ADD_ACCOUNT_CONFIRM - RESPONSE");
+			System.out.println(ADD_ACCOUNT_CONFIRM);
+			System.out.println("*****************");
+
+			/*  */
+			/*  */
+
+			/* MANAGE RECEIVED RESPONSE */
+			/*  */
+
+			/*  */
+			/*  */
+			return true;
+			// res.status(200).send(ADD_ACCOUNT_CONFIRM);
+		} catch (Exception error) {
+			error.printStackTrace();
+			System.out.println(error);
+		}
+		return false;
+		
+	}
+
 }
