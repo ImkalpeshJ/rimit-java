@@ -8,6 +8,6 @@ public class Configs {
 
     // FOR MORE INFO CHECK THE DOCUMENT -
     // https://doc.rimit.co/getting-started/readme#multi-tenant
-    public static String IS_MULTY_TENANT_PLATFORM = "YES"; // OPTIONS - YES/NO
+    public static String IS_MULTY_TENANT_PLATFORM = "NO"; // OPTIONS - YES/NO
     public static String MULTY_TENANT_MODE = "QUERY"; // OPTIONS - QUERY/PARAMS
 }

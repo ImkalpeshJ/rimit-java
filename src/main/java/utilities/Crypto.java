@@ -28,7 +28,6 @@ public class Crypto {
 		}
 	}).create();
 
-	
 	public static String encryptRimitData(String data, final String key) {
 		try {
 			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
@@ -50,7 +49,7 @@ public class Crypto {
 			String encrypted = Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes("UTF-8")));
 
 			String salt = iv + iv;
-			String hash = Hashing.hashData(encrypted, salt);
+			String hash = Hashing.hashData(data, salt);
 
 			JsonObject encryptedData = new JsonObject();
 			encryptedData.addProperty("cipher_text", encrypted);
@@ -89,11 +88,10 @@ public class Crypto {
 
 			JsonObject decryptedObject = null;
 
-			byte[] original = cipher.doFinal(Base64.getDecoder().decode(encrypted));
+			byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encrypted));
+			String decryptedString = new String(decryptedBytes);
 
-			String s = new String(cipher.doFinal(Base64.getDecoder().decode(encrypted)));
-
-			JsonElement decryptedElement = gson.fromJson(s, JsonElement.class);
+			JsonElement decryptedElement = gson.fromJson(decryptedString, JsonElement.class);
 			decryptedObject = decryptedElement.getAsJsonObject();
 
 			System.out.println("*** DECRYPTED DATA ***");
@@ -102,7 +100,7 @@ public class Crypto {
 
 			String salt = data.get("iv").getAsString() + data.get("iv").getAsString();
 			String hash = data.get("hash").getAsString();
-			boolean validHash = Hashing.hashVerify(encrypted, hash, salt);
+			boolean validHash = Hashing.hashVerify(decryptedString, hash, salt);
 			if (!validHash) {
 				System.out.println("Invalid Hash");
 				return null;
